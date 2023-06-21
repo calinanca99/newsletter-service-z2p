@@ -12,6 +12,6 @@ async fn main() -> Result<(), std::io::Error> {
 
     let address = format!("127.0.0.1:{}", configuration.port);
     let listener = TcpListener::bind(address)
-        .expect(format!("Failed to bind to {}", configuration.port).as_str());
+        .unwrap_or_else(|_| panic!("Failed to bind to {}", configuration.port));
     run(listener, connection_pool)?.await
 }

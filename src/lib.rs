@@ -27,7 +27,8 @@ pub mod test_utils {
 
         let server = crate::startup::run(listener, connection_pool.clone())
             .expect("Failed to bind to address");
-        let _ = tokio::spawn(server);
+
+        tokio::spawn(server);
 
         TestApp {
             address,
