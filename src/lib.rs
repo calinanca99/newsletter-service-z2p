@@ -6,10 +6,19 @@ pub mod telemetry;
 pub mod test_utils {
     use std::net::TcpListener;
 
+    use once_cell::sync::Lazy;
     use sqlx::{Connection, Executor, PgConnection, PgPool};
     use uuid::Uuid;
 
-    use crate::configuration::{get_configuration, DatabaseSettings};
+    use crate::{
+        configuration::{get_configuration, DatabaseSettings},
+        telemetry::{get_subscriber, init_subscriber},
+    };
+
+    static TRACING: Lazy<()> = Lazy::new(|| {
+        let subscriber = get_subscriber("test".into(), "debug".into());
+        init_subscriber(subscriber);
+    });
 
     pub struct TestApp {
         pub address: String,
@@ -17,6 +26,7 @@ pub mod test_utils {
     }
 
     pub async fn spawn_app() -> TestApp {
+        Lazy::force(&TRACING);
         let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind to random port");
         let port = listener.local_addr().unwrap().port();
         let address = format!("http://127.0.0.1:{}", port);
