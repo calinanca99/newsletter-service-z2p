@@ -16,8 +16,24 @@ pub mod test_utils {
     };
 
     static TRACING: Lazy<()> = Lazy::new(|| {
-        let subscriber = get_subscriber("test".into(), "debug".into());
-        init_subscriber(subscriber);
+        let default_filter_level = "info";
+        let subscriber_name = "test";
+
+        if std::env::var("TEST_LOG").is_ok() {
+            let subscriber = get_subscriber(
+                subscriber_name.into(),
+                default_filter_level.into(),
+                std::io::stdout,
+            );
+            init_subscriber(subscriber);
+        } else {
+            let subscriber = get_subscriber(
+                subscriber_name.into(),
+                default_filter_level.into(),
+                std::io::sink,
+            );
+            init_subscriber(subscriber);
+        }
     });
 
     pub struct TestApp {
