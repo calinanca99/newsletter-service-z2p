@@ -66,7 +66,7 @@ pub mod test_utils {
 
     async fn configure_database(config: &DatabaseSettings) -> PgPool {
         let mut connection =
-            PgConnection::connect(&config.connection_string_without_db().expose_secret())
+            PgConnection::connect(config.connection_string_without_db().expose_secret())
                 .await
                 .expect("Failed to connect to Postgres.");
 
@@ -75,7 +75,7 @@ pub mod test_utils {
             .await
             .expect("Failed to create database.");
 
-        let connection_pool = PgPool::connect(&config.connection_string().expose_secret())
+        let connection_pool = PgPool::connect(config.connection_string().expose_secret())
             .await
             .expect("Failed to connect to Postgres.");
         sqlx::migrate!("./migrations")
