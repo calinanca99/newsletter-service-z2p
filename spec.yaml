@@ -38,14 +38,3 @@ databases:
     num_nodes: 1
     size: db-s-dev-database
     version: "12"
-
-
-
-postgresql://newsletter:AVNS_227RigdrL2c47TENvXj@app-a1ba19fd-ceb6-4c04-a215-56efe6e30d12-do-user-14395003-0.b.db.ondigitalocean.com:25060/newsletter?sslmode=require
-
-host     : app-a1ba19fd-ceb6-4c04-a215-56efe6e30d12-do-user-14395003-0.b.db.ondigitalocean.com
-port     : 25060
-username : newsletter
-password : AVNS_227RigdrL2c47TENvXj
-database : newsletter
-sslmode  : require
