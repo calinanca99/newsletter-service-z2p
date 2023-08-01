@@ -5,6 +5,8 @@ use sqlx::{
     PgPool,
 };
 
+use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
+
 #[derive(Deserialize)]
 pub struct SubscriptionForm {
     pub email: String,
@@ -25,22 +27,34 @@ pub async fn subscriptions(
     form: web::Form<SubscriptionForm>,
     db: web::Data<PgPool>,
 ) -> impl Responder {
-    match insert_subscriber(&form, &db).await {
+    let (name, email) = match (
+        SubscriberName::parse(form.0.name),
+        SubscriberEmail::parse(form.0.email),
+    ) {
+        (Ok(name), Ok(email)) => (name, email),
+        _ => return HttpResponse::BadRequest().finish(),
+    };
+
+    let new_subscriber = NewSubscriber { email, name };
+    match insert_subscriber(&new_subscriber, &db).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }
 
-#[tracing::instrument(name = "Saving new subscriber in the database", skip(form, db))]
-async fn insert_subscriber(form: &SubscriptionForm, db: &PgPool) -> Result<(), sqlx::Error> {
+#[tracing::instrument(
+    name = "Saving new subscriber in the database",
+    skip(new_subscriber, db)
+)]
+async fn insert_subscriber(new_subscriber: &NewSubscriber, db: &PgPool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
         insert into subscriptions (id, email, name, subscribed_at)
         VALUES ($1, $2, $3, $4)
         "#,
         Uuid::new_v4(),
-        form.email,
-        form.name,
+        new_subscriber.email.as_ref(),
+        new_subscriber.name.as_ref(),
         Utc::now()
     )
     .execute(db)
